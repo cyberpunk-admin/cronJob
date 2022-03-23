@@ -1,0 +1,6 @@
+domain: xcliu.kubebuilder.io
+layout:
+- go.kubebuilder.io/v3
+projectName: cornjob
+repo: xcliu.kubebuilder.io/cornJob
+version: "3"
