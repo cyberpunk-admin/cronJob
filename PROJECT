@@ -3,4 +3,14 @@ layout:
 - go.kubebuilder.io/v3
 projectName: cornjob
 repo: xcliu.kubebuilder.io/cornJob
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: xcliu.kubebuilder.io
+  group: batch
+  kind: CronJob
+  path: xcliu.kubebuilder.io/cornJob/api/v1
+  version: v1
 version: "3"
