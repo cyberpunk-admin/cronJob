@@ -234,6 +234,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 		starts := 0
 		for t := sched.Next(earlistTime); !t.After(now); t = sched.Next(t) {
+			log.Error(err, "earlistTime", "earlistTime", earlistTime, "now", now)
 			lastMissed = t
 			starts++
 			if starts > 100 {
