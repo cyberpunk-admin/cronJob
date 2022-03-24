@@ -110,4 +110,5 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+	// +kubebuilder:docs-gen:collapse=old stuff
 }
