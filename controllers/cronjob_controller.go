@@ -117,8 +117,8 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// +kubebuilder:docs-gen:collapse=getScheduledTimeForJob
 
 	for i, job := range childJobs.Items {
-		_, finshedType := isJobFinished(&job)
-		switch finshedType {
+		_, finishedType := isJobFinished(&job)
+		switch finishedType {
 		case "":
 			activeJobs = append(activeJobs, &childJobs.Items[i])
 		case kbatch.JobFailed:
@@ -152,7 +152,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	for _, activejob := range activeJobs {
 		jobRef, err := ref.GetReference(r.Scheme, activejob)
 		if err != nil {
-			log.Error(err, "unable to make reference to active job", "job", &activeJobs)
+			log.Error(err, "unable to make reference to active job", "job", activeJobs)
 			continue
 		}
 		cronJob.Status.Active = append(cronJob.Status.Active, *jobRef)
@@ -263,7 +263,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	log = log.WithValues("current run", missedRun)
 	tooLate := false
 	if cronJob.Spec.StartingDeadlineSeconds != nil {
-		tooLate = missedRun.Add(time.Duration(*cronJob.Spec.StartingDeadlineSeconds) * time.Second).After(r.Now())
+		tooLate = missedRun.Add(time.Duration(*cronJob.Spec.StartingDeadlineSeconds) * time.Second).Before(r.Now())
 	}
 	if tooLate {
 		log.V(1).Info("missed starting deadline for last run, sleeping till next")
@@ -297,6 +297,10 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			Spec: *cronjob.Spec.JobTemplate.Spec.DeepCopy(),
 		}
 		for k, v := range cronjob.Spec.JobTemplate.Annotations {
+			job.Annotations[k] = v
+		}
+		job.Annotations[scheduledTimeAnnotation] = scheduleTime.Format(time.RFC3339)
+		for k, v := range cronjob.Spec.JobTemplate.Labels {
 			job.Labels[k] = v
 		}
 		if err := ctrl.SetControllerReference(cronjob, job, r.Scheme); err != nil {
@@ -313,7 +317,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	if err := r.Create(ctx, job); err != nil {
 		log.Error(err, "unable to create job for CronJob", "job", job)
-		return scheduledResult, nil
+		return ctrl.Result{}, nil
 	}
 
 	log.V(1).Info("create job for CronJob run", "job", job)
