@@ -4,7 +4,7 @@ metadata:
   name: cronjob-sample
 spec:
   schedule: "*/1 * * * *"
-  startingDeadlineSecond: 60
+  startingDeadlineSeconds: 60
   concurrencyPolicy: Allow
   jobTemplate:
     spec:
