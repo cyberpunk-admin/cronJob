@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
           - name: hello
-            images: busybox
+            image: busybox
             args:
             - /bin/sh
             - -c
