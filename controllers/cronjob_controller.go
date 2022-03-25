@@ -164,10 +164,10 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	log.V(1).Info("cronjob before update", "cronjob", cronJob)
 
-	if err := r.Status().Update(ctx, &cronJob); err != nil {
-		log.Error(err, "unable to update CronJob status")
-		return ctrl.Result{}, err
-	}
+	//if err := r.Status().Update(ctx, &cronJob); err != nil {
+	//	log.Error(err, "unable to update CronJob status")
+	//	return ctrl.Result{}, err
+	//}
 
 	log.V(1).Info("cronjob after update", "cronjob", cronJob)
 
