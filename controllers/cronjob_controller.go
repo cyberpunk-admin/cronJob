@@ -74,6 +74,8 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, nil
 	}
 
+	log.V(1).Info("now we first get cron job", "cronjob", cronJob)
+
 	// 2. List all active jobs, and update the status
 	var childJobs kbatch.JobList
 	if err := r.List(ctx, &childJobs, client.InNamespace(req.Namespace), client.MatchingFields{jobOwnerKey: req.Name}); err != nil {
@@ -160,10 +162,14 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	log.V(1).Info("job count", "active jobs", len(activeJobs), "successful jobs", len(successfulJobs), "failed jobs", len(failedJobs))
 
+	log.V(1).Info("cronjob before update", "cronjob", cronJob)
+
 	if err := r.Status().Update(ctx, &cronJob); err != nil {
 		log.Error(err, "unable to update CronJob status")
 		return ctrl.Result{}, err
 	}
+
+	log.V(1).Info("cronjob after update", "cronjob", cronJob)
 
 	// ### 3: Clean up old jobs according to the history limit
 	if cronJob.Spec.FailedJobsHistoryLimit != nil {
