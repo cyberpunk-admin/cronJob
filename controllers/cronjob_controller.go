@@ -162,14 +162,14 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	log.V(1).Info("job count", "active jobs", len(activeJobs), "successful jobs", len(successfulJobs), "failed jobs", len(failedJobs))
 
-	log.V(1).Info("cronjob before update", "cronjob", cronJob)
+	log.V(1).Info("cronjob before update", "cronjob Spec", cronJob.Spec)
 
-	//if err := r.Status().Update(ctx, &cronJob); err != nil {
-	//	log.Error(err, "unable to update CronJob status")
-	//	return ctrl.Result{}, err
-	//}
+	if err := r.Status().Update(ctx, &cronJob); err != nil {
+		log.Error(err, "unable to update CronJob status")
+		return ctrl.Result{}, err
+	}
 
-	log.V(1).Info("cronjob after update", "cronjob", cronJob)
+	log.V(1).Info("cronjob after update", "cronjob Spec", cronJob.Spec)
 
 	// ### 3: Clean up old jobs according to the history limit
 	if cronJob.Spec.FailedJobsHistoryLimit != nil {
@@ -331,7 +331,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// 7: Requeue when we either see a running job or it's time for the next scheduled run
 
-	return scheduledResult, nil
+	return ctrl.Result{}, nil
 }
 
 var (
